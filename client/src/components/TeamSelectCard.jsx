@@ -2,7 +2,7 @@ import React from 'react';
 import { api } from '../api/api';
 import Swal from 'sweetalert2';
 
-function TeamSelectCard({ player, teamId }) {
+function TeamSelectCard({ player, teamId, teamPlayers }) {
   const calculateValue = (player) => {
     let battingSR = (player.totalRuns / player.ballsFaced) * 100;
     let bowlingSR = (player.oversBowled * 6) / player.wickets;
@@ -18,8 +18,26 @@ function TeamSelectCard({ player, teamId }) {
     return value.toFixed(2);
   };
 
+  const calculateExpenses = () => {
+    let totalExpenses = 0;
+    teamPlayers.forEach((player) => {
+      totalExpenses += parseFloat(calculateValue(player)); 
+    });
+    return totalExpenses.toFixed(2);
+  };
+
 
   const handleBuyPlayer = () => {
+
+    if(parseFloat(calculateExpenses()) + parseFloat(calculateValue(player)) > 9000000){
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed',
+        text: 'You have exceeded the budget of Rs:9,000,000.00'
+      });
+      return;
+    }
+
     api
       .post("/teams/addAPlayer", { player, teamId })
       .then((response) => {
@@ -36,6 +54,7 @@ function TeamSelectCard({ player, teamId }) {
         title: 'Failed',
         text: error.response.data.message,
       }));
+      
   };
 
   return (

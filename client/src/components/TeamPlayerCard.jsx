@@ -50,6 +50,7 @@ function TeamPlayerCard({ player, teamId, setTeamPlayers }) {
         <h5 className="mb-1 text-xl font-medium text-gray-900 p-4">
           {player.name}
         </h5>
+        <span className="text-sm text-gray-500 font-bold">Rs: {calculateValue(player)}</span>
         {/* Ensuring exactly 2 lines for university name */}
         <div className="flex mt-4 md:mt-6">
           <button
