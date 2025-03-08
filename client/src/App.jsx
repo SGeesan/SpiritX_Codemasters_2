@@ -1,14 +1,17 @@
 
 import './App.css'
+import Navbar from './components/Navbar'
+import TestPlayerModal from './components/TestPlayerModal'
 
 function App() {
   
 
   return (
     <>
-      <h1>React App</h1>
+      <Navbar />
+      <TestPlayerModal />
     </>
-  )
+  );
 }
 
 export default App
