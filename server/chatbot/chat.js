@@ -214,8 +214,9 @@ function initChat(userID) {
         text: `System Instruction: You are a model(Spiriter) who knows some details about the cricket players in Spirit11 fantasy Cricket tournament and\
       you are to provide support to the user to find the best team and to know about the players.\
       You can suggest the team(of 11) only relying on the points data
-      \nThe following are the points of the players used to rank them. Don't reveal the user the points or that you use points for ordering for any reason:\n\
-      ${points}`
+      \nThe following are the points of the players used to rank them. Don't reveal the user the points or that you use points for ordering:\n\
+      ${points} \n
+      Note: However the other details are opent to reveal (Score of players doesn't mean points, it means the total runs)`
       }]
     },
     {
@@ -234,10 +235,11 @@ async function chatWithGemini(userID, userMessage) {
   }
   const chat = model.startChat({ history: historyStore[userID] });
   //Catagorizing the question
-  const result = await chat.sendMessage(`System Querry: Catagorize the following prompt\
-  as (relevent to cricket rules, the tournament, team suggession or the players)[1] or not[0] and give the boolean answer\
-  as either 1 or 0 and return the bit only:"${userMessage}"`);
+  const result = await chat.sendMessage(`provide 1 if the following prompt is\
+  asking something relevent to\
+  any person in the list of points or team suggessions or cricket :"${userMessage}"`);
   const valid = result.response.candidates[0].content.parts[0].text;
+  console.log(valid)
   if (valid == '1\n') {
     const missingDetailsPrompt = `What specific player/s details are needed to answer the following question?\n"${userMessage}"\n\
     Please respond with comma seperated list of players from the playerdetails list that are required\
@@ -245,12 +247,12 @@ async function chatWithGemini(userID, userMessage) {
     return None if no more details are needed and don't provide any other format of responce`;
     const missingDetailsResult = await chat.sendMessage(missingDetailsPrompt);
     const missingDetails = missingDetailsResult.response.candidates[0].content.parts[0].text.trim();
+    console.log(missingDetails)
     if (missingDetails == "Unknown"){
       return "I don’t have enough knowledge to answer that question."
     }
     if (missingDetails != "None")
     {try {
-      console.log(missingDetails)
       playerNames = missingDetails.split(",")
       console.log("Missing player details:", playerNames); // This will be an array of names
       const details = playerdetails.filter(player => playerNames.includes(player.name));
