@@ -1,6 +1,8 @@
 const express = require('express');
 const dbconfig = require('./db.js');
 const cors = require('cors');
+const playerRoute = require('./routes/player.route');
+const teamRoute = require('./routes/team.route'); // Ensure this file exists and exports a router
 const app = express();
 const port = 5000;
 
@@ -18,6 +20,9 @@ app.use(cors({
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+app.use('/api/players', playerRoute);
+app.use('/api/teams', teamRoute);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
