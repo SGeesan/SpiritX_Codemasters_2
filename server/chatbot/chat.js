@@ -211,7 +211,7 @@ function initChat(userID) {
     {
       role: "user",
       parts: [{
-        text: `System Instruction: You are a model(Spiriter) who knows some details about the cricket players in Spirit11 fantasy Cricket tournament and\
+        text: `System Instruction: You are a model(Spiriter) to provide details about the cricket players in Spirit11 fantasy Cricket tournament and\
       you are to provide support to the user to find the best team and to know about the players.\
       You can suggest the team(of 11) only relying on the points data
       \nThe following are the points of the players used to rank them. Don't reveal the user the points or that you use points for ordering:\n\
@@ -231,7 +231,7 @@ function initChat(userID) {
  */
 async function chatWithGemini(userID, userMessage) {
   if (!historyStore[userID]) {
-    return "Error: Chat session not initialized. Call initChat(userID) first.";
+    throw new Error("Chat session not initialized. Call initChat(userID) first.");
   }
   const chat = model.startChat({ history: historyStore[userID] });
   //Catagorizing the question
@@ -248,22 +248,23 @@ async function chatWithGemini(userID, userMessage) {
     const missingDetailsResult = await chat.sendMessage(missingDetailsPrompt);
     const missingDetails = missingDetailsResult.response.candidates[0].content.parts[0].text.trim();
     console.log(missingDetails)
-    if (missingDetails == "Unknown"){
+    if (missingDetails == "Unknown") {
       return "I don’t have enough knowledge to answer that question."
     }
-    if (missingDetails != "None")
-    {try {
-      playerNames = missingDetails.split(",")
-      console.log("Missing player details:", playerNames); // This will be an array of names
-      const details = playerdetails.filter(player => playerNames.includes(player.name));
-      const result = await chat.sendMessage(`System Instruction:\
+    if (missingDetails != "None") {
+      try {
+        playerNames = missingDetails.split(",")
+        console.log("Missing player details:", playerNames); // This will be an array of names
+        const details = playerdetails.filter(player => playerNames.includes(player.name));
+        const result = await chat.sendMessage(`System Instruction:\
       \nThe following are the information about the players. Don't reveal the user the points for any reason:\n\
       ${JSON.stringify(details)}`)
-      console.log(result.response.candidates[0].content.parts[0].text.trim())
-    } catch (error) {
-      console.error("Error parsing JSON:", error);
-      return "I can't understand the question.";
-    }}
+        console.log(result.response.candidates[0].content.parts[0].text.trim())
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+        return "I can't understand the question.";
+      }
+    }
     const botreply = await chat.sendMessage(`${userMessage}`)
     return botreply.response.candidates[0].content.parts[0].text
   }
