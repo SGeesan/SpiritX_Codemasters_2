@@ -1,13 +1,8 @@
-//Housekeeping
-require("dotenv").config();
-const dbconfig = require('../db.js');
-const express = require("express");
-const app = express();
-const PORT = 3000;
-app.use(express.json());
-
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 const Player = require('../models/player.model');
+const express = require('express');
+const router = express.Router();
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
 // Set up model
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -86,10 +81,7 @@ async function chat(req, res) {
   }
 }
 
-app.post("/chat", chat);
-app.post("/initChat", initChat);
+router.get('/init',initChat);
+router.get('/',chat);
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+module.exports = router;
