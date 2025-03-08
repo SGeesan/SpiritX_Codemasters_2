@@ -184,7 +184,7 @@ const playerdetails = [
 /**
  * Initializes a new chat session for a given userID
  */
-function initChat(userID) {
+async function initChatGemini(userID) {
   const points = `
   John: 5, 
   Marlen: 7, 
@@ -225,7 +225,6 @@ function initChat(userID) {
     }
   ];
 }
-
 /**
  * Sends a message to Gemini and maintains chat history for the given userID
  */
@@ -241,7 +240,7 @@ async function chatWithGemini(userID, userMessage) {
   const valid = result.response.candidates[0].content.parts[0].text;
   console.log(valid)
   if (valid == '1\n') {
-    const missingDetailsPrompt = `What specific player/s details are needed to answer the following question?\n"${userMessage}"\n\
+    const missingDetailsPrompt = `What additional specific player/s details are needed to answer the following question?\n"${userMessage}"\n\
     Please respond with comma seperated list of players from the playerdetails list that are required\
     return Unknown if any required playername is not in the list
     return None if no more details are needed and don't provide any other format of responce`;
@@ -257,7 +256,7 @@ async function chatWithGemini(userID, userMessage) {
         console.log("Missing player details:", playerNames); // This will be an array of names
         const details = playerdetails.filter(player => playerNames.includes(player.name));
         const result = await chat.sendMessage(`System Instruction:\
-      \nThe following are the information about the players. Don't reveal the user the points for any reason:\n\
+      \nThe following are more additional information about the players. Don't reveal the user the points for any reason:\n\
       ${JSON.stringify(details)}`)
         console.log(result.response.candidates[0].content.parts[0].text.trim())
       } catch (error) {
@@ -273,12 +272,23 @@ async function chatWithGemini(userID, userMessage) {
   }
 }
 
-/**
- * API Endpoint - GET /chat?userID=123&message=your+question
- */
-app.use(express.json()); // Middleware to parse JSON body
+app.use(express.json());
+async function initChat(req, res) {
+  const { userID } = req.body;
 
-app.post("/chat", async (req, res) => {
+  if (!userID) {
+    return res.status(400).json({ error: "Missing userID" });
+  }
+
+  try {
+    await initChatGemini(userID);
+    res.json({ message: "Chat initialized" });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+}
+async function chat(req, res) {
   const { userID, message } = req.body;
 
   if (!userID || !message) {
@@ -286,7 +296,7 @@ app.post("/chat", async (req, res) => {
   }
 
   if (!historyStore[userID]) {
-    initChat(userID);
+    return res.status(400).json({ error: "The Chat Hasn't been initialized!" });
   }
 
   try {
@@ -296,8 +306,10 @@ app.post("/chat", async (req, res) => {
     console.error("Error:", error);
     res.status(500).json({ error: "Something went wrong" });
   }
-});
+}
 
+app.post("/chat", chat);
+app.post("/initChat", initChat);
 
 // Start server
 app.listen(PORT, () => {
