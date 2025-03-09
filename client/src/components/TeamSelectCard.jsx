@@ -2,7 +2,7 @@ import React from 'react';
 import { api } from '../api/api';
 import Swal from 'sweetalert2';
 
-function TeamSelectCard({ player, teamId, teamPlayers }) {
+function TeamSelectCard({ player, teamId, teamPlayers, setActiveTab }) {
   const calculateValue = (player) => {
     let battingSR = (player.totalRuns / player.ballsFaced) * 100;
     let bowlingSR = (player.oversBowled * 6) / player.wickets;
@@ -28,8 +28,7 @@ function TeamSelectCard({ player, teamId, teamPlayers }) {
 
 
   const handleBuyPlayer = () => {
-
-    if(parseFloat(calculateExpenses()) + parseFloat(calculateValue(player)) > 9000000){
+    if (parseFloat(calculateExpenses()) + parseFloat(calculateValue(player)) > 9000000) {
       Swal.fire({
         icon: 'error',
         title: 'Failed',
@@ -37,7 +36,7 @@ function TeamSelectCard({ player, teamId, teamPlayers }) {
       });
       return;
     }
-
+  
     api
       .post("/teams/addAPlayer", { player, teamId })
       .then((response) => {
@@ -46,16 +45,22 @@ function TeamSelectCard({ player, teamId, teamPlayers }) {
           icon: 'success',
           title: 'Player Added',
           text: 'Player added to your team',
+        }).then(() => {
+           
+          window.location.reload(); 
+          
+          
         });
       })
       .catch((error) =>
-       Swal.fire({
-        icon: 'error',
-        title: 'Failed',
-        text: error.response.data.message,
-      }));
-      
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed',
+          text: error.response?.data?.message || "An error occurred",
+        })
+      );
   };
+  
 
   return (
     <div className="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm transition-transform hover:scale-105">
