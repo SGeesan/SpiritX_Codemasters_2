@@ -4,16 +4,16 @@ import Swal from 'sweetalert2';
 
 function TeamSelectCard({ player, teamId, teamPlayers, setActiveTab }) {
   const calculateValue = (player) => {
-    let battingSR = (player.totalRuns / player.ballsFaced) * 100;
-    let bowlingSR = (player.oversBowled * 6) / player.wickets;
-    let battingAVG = player.totalRuns / player.inningsPlayed;
-    let economyRate = player.runsConceded / player.oversBowled;
+    const battingSR = player.ballsFaced > 0 ? (player.totalRuns / player.ballsFaced) * 100 : 0;
+    const bowlingSR = player.wickets > 0 ? (player.oversBowled * 6) / player.wickets : 0;
+    const battingAVG = player.inningsPlayed > 0 ? player.totalRuns / player.inningsPlayed : 0;
+    const economyRate = player.oversBowled > 0 ? player.runsConceded / player.oversBowled : 0;
 
-    let points =
-      battingSR / 5 +
-      battingAVG * 0.8 +
-      500 / bowlingSR +
-      140 / economyRate;
+    
+    const point1 = battingSR / 5 + battingAVG * 0.8;
+    const point2 = bowlingSR > 0 ? 500 / bowlingSR : 0;
+    const point3 = economyRate > 0 ? 140 / economyRate : 0;
+    const points = point1 + point2 + point3;
     let value = (9 * points + 100) * 1000;
     return value.toFixed(2);
   };
