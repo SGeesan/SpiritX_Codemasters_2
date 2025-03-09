@@ -11,11 +11,11 @@ import Leaderboard from "../components/Leaderboard";
 import axios from "axios";
 import ChatButton from "../components/ChatModal";
 import AddPlayer from "../components/Admin/AddPlayer";
+import UpdatePlayer from "../components/Admin/UpdatePlayer";
 
 function AdminPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
-  
-    
+ 
     const openModal = () => {
       setIsModalOpen(true);
     };
@@ -24,6 +24,7 @@ function AdminPage() {
       setIsModalOpen(false);
     };
 
+   
     
 
   const [activeTab, setActiveTab] = useState("profile");
@@ -182,41 +183,7 @@ function AdminPage() {
         </div>
       )),
     },
-    {
-      id: "dashboard",
-      label: "Select Your Team",
-      icon: "calendar",
-      content: players.map((player, index) => (
-        <div key={index}>
-          <TeamSelectCard
-            player={player}
-            teamId={teamId}
-            teamPlayers={teamPlayers}
-            setActiveTab={setActiveTab}
-          ></TeamSelectCard>
-        </div>
-      )),
-    },
-    {
-      id: "settings",
-      label: "Team",
-      icon: "car",
-      content: teamPlayers.map((teamPlayer, index) => (
-        <div key={index}>
-          <TeamPlayerCard
-            player={teamPlayer}
-            teamId={teamId}
-            setTeamPlayers={setTeamPlayers}
-          ></TeamPlayerCard>
-        </div>
-      )),
-    },
-    {
-      id: "contacts",
-      label: "Leaderboard",
-      icon: "bookmark",
-      content: "",
-    },
+   
   ];
 
   return (
