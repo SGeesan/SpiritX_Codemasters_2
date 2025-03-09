@@ -8,6 +8,7 @@ import ChatModal from "./components/ChatModal";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import AdminPage from "./pages/AdminPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 import axios from "axios";
 function App() {
   axios.defaults.withCredentials = true;
@@ -34,7 +35,9 @@ function App() {
                 <Route path="/chat" element={<ChatModal/>} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignUpPage />} />
-                <Route path="/admin" element={<AdminPage />} />
+                <Route element = {<ProtectedRoute />} >
+                  <Route path="/admin" element={<AdminPage />} />
+                </Route>
               </Routes>
             </div>
           }

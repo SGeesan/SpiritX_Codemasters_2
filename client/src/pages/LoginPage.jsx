@@ -44,13 +44,20 @@ const LoginPage = () => {
         e.preventDefault();
         try {
             const response = await axios.post('http://localhost:5000/api/users/login', formData);
-            if (response.status === 200) {
+            if (response.status === 200 && response.data.teamId !== "Admin") {
                 setAuthError('');
                 setSuccessMessage("User login successful");
                 setTimeout(() => {
                     navigate(`/home/${response.data.teamId}`);
                 }, 2000);
-            } else if(response.status === 300){
+            } else if(response.status === 200){
+                setAuthError('');
+                setSuccessMessage("Admin login successful");
+                setTimeout(() => {
+                    navigate('/admin');
+                }, 2000);
+            }
+            else if(response.status === 300){
                 setAuthError("Invalid username or password");
             }
         } catch (error) {
