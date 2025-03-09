@@ -81,7 +81,7 @@ async function chat(req, res) {
   }
 }
 
-router.get('/init',initChat);
-router.get('/',chat);
+router.post('/init',initChat);
+router.post('/',chat);
 
 module.exports = router;

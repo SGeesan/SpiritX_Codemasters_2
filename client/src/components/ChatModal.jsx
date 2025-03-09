@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { api } from "../api/api";
 
 export default function ChatModal(){
     const [messages, setMessages] = useState([
@@ -18,7 +19,7 @@ export default function ChatModal(){
         "good place for coffee": "You should try the local coffee shop nearby."
     };
 
-    const handleSend = () => {
+    const handleSend = async () => {
         if (input.trim() === "") return;
 
         const userMessage = { text: input, sender: "user" };
@@ -26,12 +27,11 @@ export default function ChatModal(){
         setLoading(true);
         // Check for a predefined response
         const lowerInput = input.toLowerCase();
-        const botReply = responses[lowerInput] || "Sorry, I don't understand that.";
-
-        setTimeout(() => {
-            setMessages(prev => [...prev, { text: botReply, sender: "bot" }]);
-            setLoading(false); // Stop loading when bot responds
-        }, 1000);
+        const botRes = await api.post("/chat",{ userID: "12345" , message: input});
+        const botReply = botRes.data.response
+        console.log(botReply);
+        setMessages(prev => [...prev, { text: botReply, sender: "bot" }]);
+        setLoading(false);
 
         setInput("");
     };
@@ -42,6 +42,20 @@ export default function ChatModal(){
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
     }, [messages]);
+
+    useEffect(() => {
+        const initChat = async () => {
+          try {
+            const res = await api.post("/chat/init", { userID: "12345" }); // Change userID dynamically if needed
+            console.log("Chat initialized:", res.data);
+          } catch (error) {
+            console.error("Error initializing chat:", error);
+          }
+        };
+    
+        initChat();
+      }, []);
+    
     return(
     //Main container
     <div className="w-full h-full pt-10 flex flex-col">
