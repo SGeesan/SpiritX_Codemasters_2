@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import HomePage from "./pages/HomePage";
+import LandingPage from "./pages/LandingPage";
 import Navbar from "./components/Navbar";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
@@ -13,6 +14,7 @@ function App() {
       <Routes>
         {/* Home Page without Navbar 
       Add things which without NavBar*/}
+        <Route path="/" element={<LandingPage />} />
 
         {/* All Other Pages with Navbar */}
         <Route

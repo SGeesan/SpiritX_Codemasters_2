@@ -16,6 +16,7 @@ function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("All player Types");
   const [selectedUniversity, setSelectedUniversity] = useState("all");
   const [searchKey, setSearchKey] = useState("");
+  
 
   const { teamId } = useParams();
 
@@ -89,6 +90,35 @@ function HomePage() {
     return totalPoints.toFixed(2);
   };
 
+  const calculateValue = (player) => {
+    let battingSR = (player.totalRuns / player.ballsFaced) * 100;
+    let bowlingSR = (player.oversBowled * 6) / player.wickets;
+    let battingAVG = player.totalRuns / player.inningsPlayed;
+    let economyRate = player.runsConceded / player.oversBowled;
+
+    let points =
+      battingSR / 5 +
+      battingAVG * 0.8 +
+      500 / bowlingSR +
+      140 / economyRate;
+    let value = (9 * points + 100) * 1000;
+    return value.toFixed(2);
+  };
+
+  const calculateExpenses = () => {
+    let totalExpenses = 0;
+    teamPlayers.forEach((player) => {
+      totalExpenses += parseFloat(calculateValue(player)); 
+    });
+    return totalExpenses.toFixed(2);
+  };
+
+  const calculateBalance = () => {
+    const expenses = calculateExpenses();
+    const balance = 9000000 - expenses; // Initial budget of 90,000
+    return balance.toFixed(2);
+  };
+
   const tabs = [
     {
       id: "profile",
@@ -110,6 +140,7 @@ function HomePage() {
             player={player}
             teamId={teamId}
             teamPlayers={teamPlayers}
+            setActiveTab={setActiveTab}
           ></TeamSelectCard>
         </div>
       )),
@@ -228,9 +259,17 @@ function HomePage() {
                     </div>
                   )}
 
+                  {activeTab === "settings" && (
+                    <div className="text-[#bf0000] bg-white text-center w-1/2 sm:text-lg text-sm rounded-lg shadow-lg font-semibold p-4 flex flex-row justify-between items-center">
+                      <div>Expences: Rs. {calculateExpenses()} </div>
+                      <div>Balance: Rs. {calculateBalance()}</div>
+                    </div>
+                  )}
+
                   {activeTab === "settings" && teamPlayers.length == 0 && (
                     <div className="bg-[#bf0000] text-white text-center w-1/2 sm:text-lg text-sm rounded-lg shadow-lg font-semibold p-4">
-                      No Players Selected! Please Select Your Favourite Player First
+                      No Players Selected! Please Select Your Favourite Player
+                      First
                     </div>
                   )}
 
@@ -258,7 +297,7 @@ function HomePage() {
                       tab.content
                     )}
                   </div>
-                  {activeTab === "settings" && teamPlayers.length>0 && (
+                  {activeTab === "settings" && teamPlayers.length > 0 && (
                     <div className="bg-[#bf0000] text-white text-center text-sm rounded-lg shadow-lg font-semibold p-4 mt-10 ">
                       {teamPlayers.length}/11 Player(s) Selected
                     </div>
