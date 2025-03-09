@@ -3,7 +3,8 @@ const dbconfig = require('./db.js');
 const cors = require('cors');
 const playerRoute = require('./routes/player.route');
 const teamRoute = require('./routes/team.route'); 
-const userRoute = require('./routes/user.route'); 
+const userRoute = require('./routes/user.route');
+const chatRoute = require('./routes/chat.route') 
 const dotenv = require('dotenv');
 dotenv.config();
 const cookieParser = require('cookie-parser');
@@ -28,6 +29,7 @@ app.listen(port, () => {
 app.use('/api/players', playerRoute);
 app.use('/api/teams', teamRoute);
 app.use('/api/users', userRoute);
+app.use('/api/chat',chatRoute);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');

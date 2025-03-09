@@ -6,7 +6,7 @@ import ContactUs from "../components/ContactUs";
 import FAQ from "../components/FAQ";
 import Footer from "../components/Footer";
 import { FaArrowUp } from "react-icons/fa";
-
+import ChatButton from "../components/ChatModal";
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 50 },
@@ -99,7 +99,7 @@ function LandingPage() {
       >
         <Footer />
       </motion.div>
-
+      <ChatButton/>
       <ScrollToTopButton />
     </div>
   );
