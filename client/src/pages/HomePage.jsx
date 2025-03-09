@@ -7,6 +7,8 @@ import { useParams } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 import CategorySelect from "../components/CategorySelect";
 import UniversitySelect from "../components/UniversitySelect";
+import axios from "axios";
+
 
 function HomePage() {
   const [activeTab, setActiveTab] = useState("profile");
@@ -16,6 +18,21 @@ function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("All player Types");
   const [selectedUniversity, setSelectedUniversity] = useState("all");
   const [searchKey, setSearchKey] = useState("");
+
+  const[user, setUser] = useState(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/users/getuser', { withCredentials: true });
+        setUser(response.data.user);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  
+    fetchUser();
+  }, []);
+  
   
 
   const { teamId } = useParams();
@@ -170,6 +187,7 @@ function HomePage() {
 
   return (
     <div className="w-full mx-auto mt-5">
+      <button onClick={()=>console.log(user)}>Fuck Me</button>
       {/* Tabs */}
       <div className="flex flex-wrap border-b border-gray-200 mb-4 mx-10 justify-center">
         {tabs.map((tab) => (
