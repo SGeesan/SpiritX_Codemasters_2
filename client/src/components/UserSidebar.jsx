@@ -7,6 +7,9 @@ const UserSidebar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [user, setUser] = useState([]);
+  const [admin, setAdmin] = useState([]);
+  const [userloggedIn, setUserLoggedIn] = useState(false);
+  const [adminLoggedIn, setAdminLoggedIn] = useState(false);
 
   // Check if user is logged in on component mount
   useEffect(() => {
@@ -18,10 +21,25 @@ const UserSidebar = () => {
         }
       );
       if (response.status === 200) {
+        setUserLoggedIn(true);
         setIsLoggedIn(true);
         setUser(response.data.user);
       }
     };
+    const checkAdmin = async () => {
+      const response = await axios.get(
+        "http://localhost:5000/api/users/getadmin",
+        {
+          withCredentials: true,
+        }
+      );
+      if (response.status === 200) {
+        setIsLoggedIn(true);
+        setAdminLoggedIn(true);
+        setAdmin(response.data.user);
+      }
+    };
+    checkAdmin();
     checkLoggedIn();
   }, []);
 
@@ -31,7 +49,7 @@ const UserSidebar = () => {
     });
     if (response.status === 200) {
       setIsLoggedIn(false);
-      navigate("/home");
+      navigate("/");
     }
   };
 
@@ -71,7 +89,7 @@ const UserSidebar = () => {
       >
         {/* Sidebar Header */}
         <div className="bg-[#dddddd] px-4 py-6 text-white">
-          <div className="font-semibold text-lg text-black">{`${user.firstName +" "+  user.lastName}`}</div>
+          <div className="font-semibold text-lg text-black">{user.firstName ? `${user.firstName +" "+  user.lastName}`: "Admin"}</div>
           <div className="text-sm text-black/90 truncate">
             {user.email}
           </div>

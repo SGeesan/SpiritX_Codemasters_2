@@ -93,7 +93,7 @@ router.post("/login", async (req, res) => {
 
 
 router.get("/logout", async (req, res) => {
-    res.clearCookie("SpiritX2");
+    res.clearCookie("SpiritX2" || "SpiritX2Admin");
     res.status(200).send("Logout successful");
 });
 
