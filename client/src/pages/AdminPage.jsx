@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import PlayerCard from "../components/PlayerCard";
+import PlayerCardAdmin from "../components/Admin/PlayerCardAdmin";
 import TeamSelectCard from "../components/TeamSelectCard";
 import TeamPlayerCard from "../components/TeamPlayerCard";
 import { api } from "../api/api";
@@ -10,8 +10,22 @@ import UniversitySelect from "../components/UniversitySelect";
 import Leaderboard from "../components/Leaderboard";
 import axios from "axios";
 import ChatButton from "../components/ChatModal";
+import AddPlayer from "../components/Admin/AddPlayer";
 
-function HomePage() {
+function AdminPage() {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+  
+    
+    const openModal = () => {
+      setIsModalOpen(true);
+    };
+  
+    const closeModal = () => {
+      setIsModalOpen(false);
+    };
+
+    
+
   const [activeTab, setActiveTab] = useState("profile");
   const [players, setPlayers] = useState([]);
   const [duplicatePlayers, setDuplicatePlayers] = useState([]);
@@ -22,21 +36,22 @@ function HomePage() {
   const [selectedUniversity, setSelectedUniversity] = useState("all");
   const [searchKey, setSearchKey] = useState("");
 
-  const[user, setUser] = useState(null);
+  const [user, setUser] = useState(null);
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/users/getuser', { withCredentials: true });
+        const response = await axios.get(
+          "http://localhost:5000/api/users/getuser",
+          { withCredentials: true }
+        );
         setUser(response.data.user);
       } catch (error) {
         console.log(error);
       }
-    }
-  
+    };
+
     fetchUser();
   }, []);
-  
-  
 
   const { teamId } = useParams();
 
@@ -112,22 +127,15 @@ function HomePage() {
   }, [teamId]);
 
   const calculatePlayerPoint = (player) => {
-    // Handle edge cases to prevent division by zero
-    const battingSR = player.ballsFaced > 0 ? (player.totalRuns / player.ballsFaced) * 100 : 0;
-    const bowlingSR = player.wickets > 0 ? (player.oversBowled * 6) / player.wickets : 0;
-    const battingAVG = player.inningsPlayed > 0 ? player.totalRuns / player.inningsPlayed : 0;
-    const economyRate = player.oversBowled > 0 ? player.runsConceded / player.oversBowled : 0;
-    
-    // Calculate total points
-    let points = 0;
-    points += battingSR / 5;
-    points += battingAVG * 0.8;
-    points += bowlingSR > 0 ? 500 / bowlingSR : 0;
-    points += economyRate > 0 ? 140 / economyRate : 0;
-    
+    let battingSR = (player.totalRuns / player.ballsFaced) * 100;
+    let bowlingSR = (player.oversBowled * 6) / player.wickets;
+    let battingAVG = player.totalRuns / player.inningsPlayed;
+    let economyRate = player.runsConceded / player.oversBowled;
+
+    let points =
+      battingSR / 5 + battingAVG * 0.8 + 500 / bowlingSR + 140 / economyRate;
     return points.toFixed(2);
   };
-
 
   const calculateTeamPoints = () => {
     let totalPoints = 0;
@@ -138,16 +146,13 @@ function HomePage() {
   };
 
   const calculateValue = (player) => {
-    const battingSR = player.ballsFaced > 0 ? (player.totalRuns / player.ballsFaced) * 100 : 0;
-    const bowlingSR = player.wickets > 0 ? (player.oversBowled * 6) / player.wickets : 0;
-    const battingAVG = player.inningsPlayed > 0 ? player.totalRuns / player.inningsPlayed : 0;
-    const economyRate = player.oversBowled > 0 ? player.runsConceded / player.oversBowled : 0;
+    let battingSR = (player.totalRuns / player.ballsFaced) * 100;
+    let bowlingSR = (player.oversBowled * 6) / player.wickets;
+    let battingAVG = player.totalRuns / player.inningsPlayed;
+    let economyRate = player.runsConceded / player.oversBowled;
 
-    
-    const point1 = battingSR / 5 + battingAVG * 0.8;
-    const point2 = bowlingSR > 0 ? 500 / bowlingSR : 0;
-    const point3 = economyRate > 0 ? 140 / economyRate : 0;
-    const points = point1 + point2 + point3;
+    let points =
+      battingSR / 5 + battingAVG * 0.8 + 500 / bowlingSR + 140 / economyRate;
     let value = (9 * points + 100) * 1000;
     return value.toFixed(2);
   };
@@ -155,7 +160,7 @@ function HomePage() {
   const calculateExpenses = () => {
     let totalExpenses = 0;
     teamPlayers.forEach((player) => {
-      totalExpenses += parseFloat(calculateValue(player)); 
+      totalExpenses += parseFloat(calculateValue(player));
     });
     return totalExpenses.toFixed(2);
   };
@@ -173,7 +178,7 @@ function HomePage() {
       icon: "user",
       content: players.map((player, index) => (
         <div key={index}>
-          <PlayerCard player={player}></PlayerCard>
+          <PlayerCardAdmin player={player}></PlayerCardAdmin>
         </div>
       )),
     },
@@ -210,14 +215,15 @@ function HomePage() {
       id: "contacts",
       label: "Leaderboard",
       icon: "bookmark",
-      content:""
-     
+      content: "",
     },
   ];
 
   return (
     <div className="w-full mx-auto mt-5">
-      
+      <div>
+      {isModalOpen && <AddPlayer isOpen={openModal} onClose={closeModal}  />}
+      </div>
       {/* Tabs */}
       <div className="flex flex-wrap border-b border-gray-200 mb-4 mx-10 justify-center">
         {tabs.map((tab) => (
@@ -300,6 +306,12 @@ function HomePage() {
                 ></h2>
 
                 <div className="flex flex-col items-center">
+                {activeTab === "profile" &&  (
+                    <button className="bg-[#bf0000] text-white text-center sm:text-lg text-sm rounded-lg shadow-lg font-semibold p-2 hover:bg-red-400 focus:outline-none transition-all duration-500" onClick={openModal}>
+                      Add a Player
+                    </button>
+                  )}
+                  {/* ----------------------------------------------------------------------- */}
                   {activeTab === "settings" && teamPlayers.length == 11 && (
                     <div className="bg-[#bf0000] text-white text-center w-1/2 sm:text-lg text-sm rounded-lg shadow-lg font-semibold p-4">
                       Congratulations! Your Team has {calculateTeamPoints()}{" "}
@@ -332,15 +344,17 @@ function HomePage() {
                   )}
                   {activeTab === "contacts" && (
                     <div className="flex flex-col sm:flex-row max-w-6xl gap-2 sm:gap-10 mx-5 shadow-lg rounded-lg p-5 bg-white">
-                      <div >
-          <Leaderboard
-            users={users}
-            teams={teams}
-            user={user}
-          ></Leaderboard>
-        </div>
+                      <div>
+                        <Leaderboard
+                          users={users}
+                          teams={teams}
+                          user={user}
+                        ></Leaderboard>
+                      </div>
                     </div>
                   )}
+
+                {/* ----------------------------------------------------------------------- */}
 
                   <div className="max-w-6xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-10 md:gap-2 lg:gap-5 mx-10 sm:mx-10 mt-10">
                     {typeof tab.content === "string" ? (
@@ -354,10 +368,9 @@ function HomePage() {
                       />
                     ) : (
                       tab.content
-      
                     )}
                   </div>
-                  <ChatButton/>
+
                   {activeTab === "settings" && teamPlayers.length > 0 && (
                     <div className="bg-[#bf0000] text-white text-center text-sm rounded-lg shadow-lg font-semibold p-4 mt-10 ">
                       {teamPlayers.length}/11 Player(s) Selected
@@ -372,4 +385,4 @@ function HomePage() {
   );
 }
 
-export default HomePage;
+export default AdminPage;

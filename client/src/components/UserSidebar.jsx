@@ -1,20 +1,38 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const UserSidebar = () => {
+  const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [user, setUser] = useState([]);
 
   // Check if user is logged in on component mount
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      setIsLoggedIn(true);
-    }
+    const checkLoggedIn = async () => {
+      const response = await axios.get(
+        "http://localhost:5000/api/users/getuser",
+        {
+          withCredentials: true,
+        }
+      );
+      if (response.status === 200) {
+        setIsLoggedIn(true);
+        setUser(response.data.user);
+      }
+    };
+    checkLoggedIn();
   }, []);
 
-  const handleSignOut = () => {
-    localStorage.removeItem("user");
-    setIsLoggedIn(false);
+  const handleSignOut = async () => {
+    const response = await axios.get("http://localhost:5000/api/users/logout", {
+      withCredentials: true,
+    });
+    if (response.status === 200) {
+      setIsLoggedIn(false);
+      navigate("/home");
+    }
   };
 
   const toggleSidebar = () => {
@@ -53,15 +71,15 @@ const UserSidebar = () => {
       >
         {/* Sidebar Header */}
         <div className="bg-[#dddddd] px-4 py-6 text-white">
-          <div className="font-semibold text-lg text-black">Bonnie Green</div>
+          <div className="font-semibold text-lg text-black">{`${user.firstName +" "+  user.lastName}`}</div>
           <div className="text-sm text-black/90 truncate">
-            name@flowbite.com
+            {user.email}
           </div>
         </div>
 
         {/* Sidebar Menu */}
         <ul className="py-4">
-          <li>
+          {/* <li>
             <a
               href="#"
               className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
@@ -80,8 +98,8 @@ const UserSidebar = () => {
               </svg>
               Profile
             </a>
-          </li>
-          <li>
+          </li> */}
+          {/* <li>
             <a
               href="#"
               className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
@@ -100,8 +118,8 @@ const UserSidebar = () => {
               </svg>
               Create Ad
             </a>
-          </li>
-          <li>
+          </li> */}
+          {/* <li>
             <a
               href="#"
               className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
@@ -120,7 +138,7 @@ const UserSidebar = () => {
               </svg>
               Settings
             </a>
-          </li>
+          </li> */}
 
           {/* Conditional Rendering for Sign Up and Sign In */}
           {!isLoggedIn && (
