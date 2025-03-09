@@ -1,4 +1,5 @@
 
+import PlayerUpdateForm from './components/PlayerUpdateForm';
 import './App.css'
 
 function App() {
@@ -6,7 +7,7 @@ function App() {
 
   return (
     <>
-      <h1>React App</h1>
+      <PlayerUpdateForm></PlayerUpdateForm>
     </>
   )
 }
