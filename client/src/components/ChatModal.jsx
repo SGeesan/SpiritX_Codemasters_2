@@ -59,7 +59,7 @@ export default function ChatModal(){
     //Main container
     <div className="w-full h-full pt-10 flex flex-col">
         {/*chat bot div */}
-       <div className=" rounded-lg shadow-lg w-full h-full " style={{ backgroundImage: "url(./sprinter.jpg)" }}>
+       <div className=" rounded-lg shadow-lg w-full h-full bg-cover bg-opacity" style={{ backgroundImage: "url(./sprinter.jpg)" }}>
         
             {/*chat bot header div*/}
             <div className="border-b-2 px-2 py-4 bg-transparent" >

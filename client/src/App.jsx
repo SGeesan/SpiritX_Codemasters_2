@@ -3,7 +3,7 @@ import { useState } from "react";
 import HomePage from "./pages/HomePage";
 import LandingPage from "./pages/LandingPage";
 import Navbar from "./components/Navbar";
-
+import ChatModal from "./components/ChatModal";
 function App() {
   return (
     <BrowserRouter>
@@ -23,6 +23,7 @@ function App() {
               <Routes>
                 <Route path="/home/:teamId" element={<HomePage />} />
                 <Route path="/home" element={<HomePage />} />
+                <Route path="/chat" element={<ChatModal/>} />
               </Routes>
             </div>
           }
