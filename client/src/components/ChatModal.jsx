@@ -12,12 +12,12 @@ export default function ChatModal(){
     const chatContainerRef = useRef(null);
 
     // Hardcoded responses
-    const responses = {
-        "hello": "Hi there! How can I assist you?",
-        "how are you": "I'm just a bot, but I'm doing great!",
-        "goodbye": "Goodbye! Have a nice day!",
-        "good place for coffee": "You should try the local coffee shop nearby."
-    };
+    // const responses = {
+    //     "hello": "Hi there! How can I assist you?",
+    //     "how are you": "I'm just a bot, but I'm doing great!",
+    //     "goodbye": "Goodbye! Have a nice day!",
+    //     "good place for coffee": "You should try the local coffee shop nearby."
+    // };
 
     const handleSend = async () => {
         if (input.trim() === "") return;
@@ -26,7 +26,6 @@ export default function ChatModal(){
         setMessages(prev => [...prev, userMessage]);
         setLoading(true);
         // Check for a predefined response
-        const lowerInput = input.toLowerCase();
         const botRes = await api.post("/chat",{ userID: "12345" , message: input});
         const botReply = botRes.data.response
         console.log(botReply);
@@ -66,7 +65,7 @@ export default function ChatModal(){
             <div className="border-b-2 px-2 py-4 bg-transparent" >
                 <div className="inline-flex items-center">
                    
-                   <span className="ml-4 font-bold text-red-700 text-2xl" >Sprinter</span>   
+                   <span className="ml-4 font-bold text-red-700 text-2xl" >Spiriter</span>   
                 </div>
             </div>
             {/*chat bot Body div*/}
