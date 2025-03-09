@@ -1,14 +1,48 @@
 
-import './App.css'
-
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useState } from "react";
+import HomePage from "./pages/HomePage";
+import LandingPage from "./pages/LandingPage";
+import Navbar from "./components/Navbar";
+import ChatModal from "./components/ChatModal";
+import LoginPage from "./pages/LoginPage";
+import SignUpPage from "./pages/SignUpPage";
+import AdminPage from "./pages/AdminPage";
+import axios from "axios";
 function App() {
-  
-
+  axios.defaults.withCredentials = true;
   return (
-    <>
-      <h1>React App</h1>
-    </>
-  )
+    <BrowserRouter>
+      {/* {loading && <Loader />} Show loading overlay------------ */}
+      <Routes>
+        {/* Home Page without Navbar 
+      Add things which without NavBar*/}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+
+        {/* All Other Pages with Navbar */}
+        <Route
+          path="/*"
+          element={
+            <div className="App bg-white">
+              {/* {!loading && <Navbar />} Hide Navbar while loading------------ */}
+              <Navbar />
+              <Routes>
+                <Route path="/home/:teamId" element={<HomePage />} />
+                <Route path="/home" element={<HomePage />} />
+                <Route path="/chat" element={<ChatModal/>} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignUpPage />} />
+                <Route path="/admin" element={<AdminPage />} />
+              </Routes>
+            </div>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+
+  );
 }
 
-export default App
+export default App;
