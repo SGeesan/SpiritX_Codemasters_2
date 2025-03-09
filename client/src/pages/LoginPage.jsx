@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
 
@@ -10,6 +10,7 @@ const LoginPage = () => {
     });
     const [authError, setAuthError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -19,6 +20,20 @@ const LoginPage = () => {
         });
         setAuthError('');
     }
+
+    useEffect(() => {
+        const checkRememberMe = async () => {
+            const response = await axios.get('http://localhost:5000/api/users/getrememberme');
+            if (response.status === 200) {
+                setFormData({
+                    username: response.data.username,
+                    password: response.data.password
+                });
+                setRememberMe(true);
+            }
+        }
+        checkRememberMe();
+    }, []);
 
     const has8Chars = formData.username.length >= 8;
     const hasLowercase = /[a-z]/.test(formData.password);
@@ -30,6 +45,7 @@ const LoginPage = () => {
         try {
             const response = await axios.post('http://localhost:5000/api/users/login', formData);
             if (response.status === 200) {
+                setAuthError('');
                 setSuccessMessage("User login successful");
                 setTimeout(() => {
                     navigate('/home');
@@ -106,7 +122,20 @@ const LoginPage = () => {
                                     id="remember-me"
                                     name="remember-me"
                                     type="checkbox"
+                                    checked={rememberMe}
                                     className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                                    onChange={async () => {
+                                        const newRememberMe = !rememberMe;
+                                        setRememberMe(newRememberMe);
+                                        const response = await axios.post('http://localhost:5000/api/users/rememberme', { username: formData.username, password: formData.password});
+                                        if (response.status === 200) {
+                                            setAuthError('');
+                                            setSuccessMessage("Remember me successful");
+                                        } else {
+                                            setSuccessMessage('');
+                                            setAuthError("Remember me unsuccessful");
+                                        }
+                                    }}
                                 />
                                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-600">
                                     Remember me
