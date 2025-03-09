@@ -35,19 +35,36 @@ router.post("/login", async (req, res) => {
             .findOne({ username: username }, {})
             .exec();
         
-        if (user === null) {
+        if (!user) {
             return res.status(400).send("User not found");
         }
         
         const isPasswordMatch = await bcrypt.compare(password, user.password);
         if (isPasswordMatch) {
-            const token = jwt.sign({ user : {firstName: user.firstName, lastName: user.lastName, email: user.email, username: user.username, teamId: user.teamId} }, process.env.JWT_SECRET_KEY, { expiresIn: "1h" });
+            const token = jwt.sign(
+                { 
+                    user: {
+                        firstName: user.firstName, 
+                        lastName: user.lastName, 
+                        email: user.email, 
+                        username: user.username, 
+                        teamId: user.teamId
+                    } 
+                }, 
+                process.env.JWT_SECRET_KEY, 
+                { expiresIn: "1h" }
+            );
+
             res.cookie("SpiritX2", token, { 
                 httpOnly: true,
                 secure: true,
                 sameSite: "none"
             });
-            return res.status(200).send("Login successful");
+
+            return res.status(200).json({
+                message: "Login successful",
+                teamId: user.teamId
+            });
         } else {
             return res.status(400).send("Invalid password");
         }
@@ -55,6 +72,7 @@ router.post("/login", async (req, res) => {
         return res.status(400).send("Invalid username");
     }
 });
+
 
 router.get("/logout", async (req, res) => {
     res.clearCookie("SpiritX2");
@@ -102,5 +120,14 @@ router.get("/getrememberme", async (req, res) => {
     } catch (error) {
         return res.status(400).send("User not found");
     }
+});
+
+router.get("/getAllUsers", async (req, res) => {
+    try {
+        const users = await User.find();
+        res.json({users});
+      } catch (error) {
+        res.status(500).json({ message: error.message });
+      }
 });
 module.exports = router;

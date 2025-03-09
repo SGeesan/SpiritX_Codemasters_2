@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 import CategorySelect from "../components/CategorySelect";
 import UniversitySelect from "../components/UniversitySelect";
+import Leaderboard from "../components/Leaderboard";
 import axios from "axios";
 
 
@@ -14,6 +15,8 @@ function HomePage() {
   const [activeTab, setActiveTab] = useState("profile");
   const [players, setPlayers] = useState([]);
   const [duplicatePlayers, setDuplicatePlayers] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [teams, setTeams] = useState([]);
   const [teamPlayers, setTeamPlayers] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All player Types");
   const [selectedUniversity, setSelectedUniversity] = useState("all");
@@ -73,6 +76,26 @@ function HomePage() {
       .then((response) => {
         setPlayers(response.data.players);
         setDuplicatePlayers(response.data.players);
+      })
+      .catch((error) => console.log(error))
+      .finally(() => console.log("All done"));
+  }, []);
+
+  useEffect(() => {
+    api
+      .get("/users/getAllUsers")
+      .then((response) => {
+        setUsers(response.data.users);
+      })
+      .catch((error) => console.log(error))
+      .finally(() => console.log("All done"));
+  }, []);
+
+  useEffect(() => {
+    api
+      .get("/teams/getAllTeams")
+      .then((response) => {
+        setTeams(response.data.teams);
       })
       .catch((error) => console.log(error))
       .finally(() => console.log("All done"));
@@ -180,14 +203,14 @@ function HomePage() {
       id: "contacts",
       label: "Leaderboard",
       icon: "bookmark",
-      content:
-        "This is the **Contacts tab's content**. Here you can manage your contacts.",
+      content:""
+     
     },
   ];
 
   return (
     <div className="w-full mx-auto mt-5">
-      <button onClick={()=>console.log(user)}>Fuck Me</button>
+      
       {/* Tabs */}
       <div className="flex flex-wrap border-b border-gray-200 mb-4 mx-10 justify-center">
         {tabs.map((tab) => (
@@ -298,6 +321,17 @@ function HomePage() {
                         filterByDistrict={setSelectedUniversity}
                       />
                       <SearchBar setsearchKey={setSearchKey} />
+                    </div>
+                  )}
+                  {activeTab === "contacts" && (
+                    <div className="flex flex-col sm:flex-row max-w-6xl gap-2 sm:gap-10 mx-5 shadow-lg rounded-lg p-5 bg-white">
+                      <div >
+          <Leaderboard
+            users={users}
+            teams={teams}
+            user={user}
+          ></Leaderboard>
+        </div>
                     </div>
                   )}
 

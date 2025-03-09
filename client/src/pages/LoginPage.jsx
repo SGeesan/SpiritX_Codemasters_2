@@ -48,7 +48,7 @@ const LoginPage = () => {
                 setAuthError('');
                 setSuccessMessage("User login successful");
                 setTimeout(() => {
-                    navigate('/home');
+                    navigate(`/home/${response.data.teamId}`);
                 }, 2000);
             } else if(response.status === 300){
                 setAuthError("Invalid username or password");
@@ -57,6 +57,7 @@ const LoginPage = () => {
             setAuthError(error.message || 'An error occurred during login');
         }
     }
+
 
     return (
         <div className="flex min-h-screen items-center justify-center  py-12 px-4">
