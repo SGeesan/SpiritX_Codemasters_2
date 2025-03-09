@@ -32,9 +32,11 @@ router.post("/login", async (req, res) => {
         const user = await User
             .findOne({ username: username }, {})
             .exec();
+        
         if (user === null) {
-            res.status(400).send("User not found");
+            return res.status(400).send("User not found");
         }
+        
         const isPasswordMatch = await bcrypt.compare(password, user.password);
         if (isPasswordMatch) {
             const token = jwt.sign({ user : {firstName: user.firstName, lastName: user.lastName, email: user.email, username: user.username} }, process.env.JWT_SECRET_KEY, { expiresIn: "1h" });
@@ -43,16 +45,16 @@ router.post("/login", async (req, res) => {
                 secure: true,
                 sameSite: "none"
             });
-            res.status(200).send("Login successful");
+            return res.status(200).send("Login successful");
         } else {
-            res.status(400).send("Invalid password");
+            return res.status(400).send("Invalid password");
         }
     } catch (error) {
-        res.status(400).send("Invalid username");
+        return res.status(400).send("Invalid username");
     }
 });
 
-router.get("/logout", (req, res) => {
+router.get("/logout", async (req, res) => {
     res.clearCookie("SpiritX2");
     res.status(200).send("Logout successful");
 });
@@ -60,13 +62,13 @@ router.get("/logout", (req, res) => {
 router.get("/getuser", async (req, res) => {
     const token = req.cookies["SpiritX2"];
     if (!token) {
-        res.status(400).send("User not found");
+        return res.status(400).send("User not found");
     }
     jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
         if (err) {
-            res.status(400).send("User not found");
+            return res.status(400).send("User not found");
         } else {
-            res.status(200).send(decoded);
+            return res.status(200).send(decoded);
         }
     });
 });
@@ -86,17 +88,17 @@ router.get("/getrememberme", async (req, res) => {
     try {
         const token = req.cookies["SpiritX2RemME"];
         if (!token) {
-            res.status(400).send("User not found");
+            return res.status(400).send("User not found");
         }
         jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
             if (err) {
-                res.status(400).send("User not found");
+                return res.status(400).send("User not found");
             } else {
-                res.status(200).send(decoded);
+                return res.status(200).send(decoded);
             }
         });
     } catch (error) {
-        res.status(400).send("User not found");
+        return res.status(400).send("User not found");
     }
 });
 module.exports = router;
