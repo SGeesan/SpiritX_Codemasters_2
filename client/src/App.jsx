@@ -1,18 +1,12 @@
-
-import './App.css'
-import LoadingComponent from './components/LoadingComponent';
-
-
+import TeamsComponent from "./components/GetTeams";
+import "./App.css";
 
 function App() {
-  
-
   return (
     <>
-      <LoadingComponent />
-      
+      <TeamsComponent />
     </>
   );
 }
 
-export default App
+export default App;
