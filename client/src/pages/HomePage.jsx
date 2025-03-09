@@ -9,7 +9,7 @@ import CategorySelect from "../components/CategorySelect";
 import UniversitySelect from "../components/UniversitySelect";
 import Leaderboard from "../components/Leaderboard";
 import axios from "axios";
-
+import ChatButton from "../components/ChatModal";
 
 function HomePage() {
   const [activeTab, setActiveTab] = useState("profile");
@@ -347,8 +347,10 @@ function HomePage() {
                       />
                     ) : (
                       tab.content
+      
                     )}
                   </div>
+                  <ChatButton/>
                   {activeTab === "settings" && teamPlayers.length > 0 && (
                     <div className="bg-[#bf0000] text-white text-center text-sm rounded-lg shadow-lg font-semibold p-4 mt-10 ">
                       {teamPlayers.length}/11 Player(s) Selected
