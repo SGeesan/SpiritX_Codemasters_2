@@ -67,7 +67,7 @@ const HeroSection = () => {
                 </li>
                 <li>
                   <a
-                    href="/about"
+                    href="/#about"
                     className="hover:text-gray-300"
                     onClick={() => setIsOpen(false)}
                   >
@@ -76,7 +76,7 @@ const HeroSection = () => {
                 </li>
                 <li>
                   <a
-                    href="/contact"
+                    href="/#contact"
                     className="hover:text-gray-300"
                     onClick={() => setIsOpen(false)}
                   >
@@ -85,7 +85,7 @@ const HeroSection = () => {
                 </li>
                 <li>
                   <a
-                    href="/faqs"
+                    href="/#faqs"
                     className="hover:text-gray-300"
                     onClick={() => setIsOpen(false)}
                   >
@@ -112,7 +112,7 @@ const HeroSection = () => {
       </p>
       <div className="flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0">
         <motion.a
-          href="/vehicles"
+          href="/home"
           whileHover={{ scale: 1.1 }} // Hover effect
           whileTap={{ scale: 0.9 }} // Tap effect
           className="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-white rounded-lg bg-[#bf0000] hover:bg-red-300 transition-all duration-700"
@@ -135,7 +135,7 @@ const HeroSection = () => {
           </svg>
         </motion.a>
         <motion.a
-          href="/signin"
+          href="/login"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           className="inline-flex justify-center hover:text-gray-900 items-center py-3 px-5 sm:ms-4 text-base font-medium text-center text-white rounded-lg border border-white hover:bg-gray-100 transition-all duration-700"

@@ -16,6 +16,8 @@ function App() {
         {/* Home Page without Navbar 
       Add things which without NavBar*/}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
 
         {/* All Other Pages with Navbar */}
         <Route

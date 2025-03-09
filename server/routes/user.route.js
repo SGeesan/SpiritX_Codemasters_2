@@ -18,8 +18,10 @@ router.post("/adduser", async (req, res) => {
             .findOne({ email: email, username: username })
             .select("_id")
             .exec();
-        const newTeam = new Team({ userId: newuser._id, name: `${"My team " + newUser._id}` });
+        const teamName = "My team " + newuser._id;
+        const newTeam = new Team({ userId: newuser._id, name: teamName });
         await newTeam.save();
+        await User.updateOne({ _id: newuser._id }, { teamId: newTeam._id });
         res.status(201).send("User added successfully");
     } catch (err) {
         res.status(400).send("Unable to save to database");
@@ -32,27 +34,47 @@ router.post("/login", async (req, res) => {
         const user = await User
             .findOne({ username: username }, {})
             .exec();
-        if (user === null) {
-            res.status(400).send("User not found");
+        
+        if (!user) {
+            return res.status(400).send("User not found");
         }
+        
         const isPasswordMatch = await bcrypt.compare(password, user.password);
         if (isPasswordMatch) {
-            const token = jwt.sign({ user : {firstName: user.firstName, lastName: user.lastName, email: user.email, username: user.username} }, process.env.JWT_SECRET_KEY, { expiresIn: "1h" });
+            const token = jwt.sign(
+                { 
+                    user: {
+                        firstName: user.firstName, 
+                        lastName: user.lastName, 
+                        email: user.email, 
+                        username: user.username, 
+                        teamId: user.teamId
+                    } 
+                }, 
+                process.env.JWT_SECRET_KEY, 
+                { expiresIn: "1h" }
+            );
+
             res.cookie("SpiritX2", token, { 
                 httpOnly: true,
                 secure: true,
                 sameSite: "none"
             });
-            res.status(200).send("Login successful");
+
+            return res.status(200).json({
+                message: "Login successful",
+                teamId: user.teamId
+            });
         } else {
-            res.status(400).send("Invalid password");
+            return res.status(400).send("Invalid password");
         }
     } catch (error) {
-        res.status(400).send("Invalid username");
+        return res.status(400).send("Invalid username");
     }
 });
 
-router.get("/logout", (req, res) => {
+
+router.get("/logout", async (req, res) => {
     res.clearCookie("SpiritX2");
     res.status(200).send("Logout successful");
 });
@@ -60,13 +82,13 @@ router.get("/logout", (req, res) => {
 router.get("/getuser", async (req, res) => {
     const token = req.cookies["SpiritX2"];
     if (!token) {
-        res.status(400).send("User not found");
+        return res.status(400).send("User not found");
     }
     jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
         if (err) {
-            res.status(400).send("User not found");
+            return res.status(400).send("User not found");
         } else {
-            res.status(200).send(decoded);
+            return res.status(200).send(decoded);
         }
     });
 });
@@ -86,17 +108,26 @@ router.get("/getrememberme", async (req, res) => {
     try {
         const token = req.cookies["SpiritX2RemME"];
         if (!token) {
-            res.status(400).send("User not found");
+            return res.status(400).send("User not found");
         }
         jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
             if (err) {
-                res.status(400).send("User not found");
+                return res.status(400).send("User not found");
             } else {
-                res.status(200).send(decoded);
+                return res.status(200).send(decoded);
             }
         });
     } catch (error) {
-        res.status(400).send("User not found");
+        return res.status(400).send("User not found");
     }
 });
-module.exports = router;
+
+router.get("/getAllUsers", async (req, res) => {
+    try {
+        const users = await User.find();
+        res.json({users});
+      } catch (error) {
+        res.status(500).json({ message: error.message });
+      }
+});
+module.exports = router;
