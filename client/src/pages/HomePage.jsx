@@ -16,6 +16,7 @@ function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("All player Types");
   const [selectedUniversity, setSelectedUniversity] = useState("all");
   const [searchKey, setSearchKey] = useState("");
+  
 
   const { teamId } = useParams();
 
@@ -139,6 +140,7 @@ function HomePage() {
             player={player}
             teamId={teamId}
             teamPlayers={teamPlayers}
+            setActiveTab={setActiveTab}
           ></TeamSelectCard>
         </div>
       )),
