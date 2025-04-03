@@ -9,7 +9,7 @@ const Team = require("./models/teams");
 
 // Connect to MongoDB
 const mongoURL =
-  "mongodb+srv://pclokuhewa:RlhjuKEBotFw5qze@cluster0.tbo6y.mongodb.net/Spirit11";
+ //Add your Mongo URI
 mongoose.connect(mongoURL);
 
 const connection = mongoose.connection;
