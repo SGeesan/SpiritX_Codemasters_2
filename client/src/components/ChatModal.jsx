@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+
 import { api } from "../api/api";
 
 export default function ChatButton() {
@@ -179,6 +180,7 @@ export default function ChatButton() {
               >
                 <img src="./send.svg" alt="Send" className="w-5 h-5" />
               </button>
+
             </div>
           </div>
         </div>
