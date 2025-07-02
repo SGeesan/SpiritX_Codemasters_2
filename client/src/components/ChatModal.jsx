@@ -1,109 +1,190 @@
 import { useState, useEffect, useRef } from "react";
 
-export default function ChatModal(){
-    const [messages, setMessages] = useState([
-        { text: "How can I help?", sender: "bot" }
-    ]);
-    const [input, setInput] = useState("");
-    const [loading, setLoading] = useState(false); // Track the loading state
+import { api } from "../api/api";
 
-    // Reference to chat container
-    const chatContainerRef = useRef(null);
+export default function ChatButton() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([
+    { text: "How can I help?", sender: "bot" }
+  ]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const chatContainerRef = useRef(null);
+  const chatModalRef = useRef(null);
 
-    // Hardcoded responses
-    const responses = {
-        "hello": "Hi there! How can I assist you?",
-        "how are you": "I'm just a bot, but I'm doing great!",
-        "goodbye": "Goodbye! Have a nice day!",
-        "good place for coffee": "You should try the local coffee shop nearby."
+  const toggleChat = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const handleSend = async () => {
+    if (input.trim() === "") return;
+
+    const userMessage = { text: input, sender: "user" };
+    setMessages(prev => [...prev, userMessage]);
+    setLoading(true);
+    
+    try {
+      const botRes = await api.post("/chat", { userID: "12345", message: input });
+      const botReply = botRes.data.response;
+      console.log(botReply);
+      setMessages(prev => [...prev, { text: botReply, sender: "bot" }]);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setMessages(prev => [...prev, { text: "Sorry, I couldn't process your request.", sender: "bot" }]);
+    } finally {
+      setLoading(false);
+      setInput("");
+    }
+  };
+
+  // Handle clicking outside to close the chat
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (chatModalRef.current && !chatModalRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
+  // Auto-scroll to bottom when messages update
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  // Initialize chat when component mounts
+  useEffect(() => {
+    const initChat = async () => {
+      try {
+        const res = await api.post("/chat/init", { userID: "12345" });
+        console.log("Chat initialized:", res.data);
+      } catch (error) {
+        console.error("Error initializing chat:", error);
+      }
     };
 
-    const handleSend = () => {
-        if (input.trim() === "") return;
+    initChat();
+  }, []);
 
-        const userMessage = { text: input, sender: "user" };
-        setMessages(prev => [...prev, userMessage]);
-        setLoading(true);
-        // Check for a predefined response
-        const lowerInput = input.toLowerCase();
-        const botReply = responses[lowerInput] || "Sorry, I don't understand that.";
+  // Handle Enter key press for sending messages
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
 
-        setTimeout(() => {
-            setMessages(prev => [...prev, { text: botReply, sender: "bot" }]);
-            setLoading(false); // Stop loading when bot responds
-        }, 1000);
+  return (
+    <div className="relative">
+      {/* Side Chat Button - Hidden when chat is open */}
+      <button 
+        onClick={toggleChat}
+        className={`fixed right-0 top-1/2 transform -translate-y-1/2 bg-red-600 text-white p-3 rounded-l-lg shadow-lg hover:bg-red-700 transition-all z-50 ${isOpen ? 'opacity-0 translate-x-full pointer-events-none' : 'opacity-100 translate-x-0'}`}
+        style={{ 
+          writingMode: 'vertical-rl',
+          textOrientation: 'mixed',
+          padding: '20px 8px',
+          transitionProperty: 'opacity, transform',
+          transitionDuration: '300ms'
+        }}
+      >
+        <div className="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+          </svg>
+          <span>Chat with Spiriter</span>
+        </div>
+      </button>
 
-        setInput("");
-    };
-
-    // Auto-scroll to bottom when messages update
-    useEffect(() => {
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-    }, [messages]);
-    return(
-    //Main container
-    <div className="w-full h-full pt-10 flex flex-col">
-        {/*chat bot div */}
-       <div className=" rounded-lg shadow-lg w-full h-full " style={{ backgroundImage: "url(./sprinter.jpg)" }}>
-        
-            {/*chat bot header div*/}
-            <div className="border-b-2 px-2 py-4 bg-transparent" >
-                <div className="inline-flex items-center">
-                   
-                   <span className="ml-4 font-bold text-red-700 text-2xl" >Sprinter</span>   
-                </div>
+      {/* Side Sliding Chat Modal */}
+      <div 
+        ref={chatModalRef}
+        className={`fixed top-0 right-0 w-80 md:w-96 h-full bg-white shadow-2xl z-40 transition-transform duration-300 ease-in-out ${isOpen ? 'transform-none' : 'translate-x-full'}`}
+        style={{ borderLeft: '1px solid #e5e7eb' }}
+      >
+        <div className="w-full h-full flex flex-col overflow-hidden">
+          {/* Chat Header */}
+          <div className="border-b-2 px-4 py-3 bg-white flex justify-between items-center">
+            <div className="flex items-center">
+              <span className="font-bold text-red-700 text-xl">Spiriter</span>
             </div>
-            {/*chat bot Body div*/}
-            <div ref={chatContainerRef} className=" flex-grow h-80 flex flex-col w-full px-2 mb-2 mt-2 space-y-4 bg-transparent overflow-y-auto">
-                    {messages.map((msg, index) => (
-                        <div key={index} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-                            <span className={`px-4 py-2 text-white rounded-lg break-words ${msg.sender === "user" ? "bg-black" : "bg-red-600"}`}
-                            style={{
-                                wordBreak: "break-word", // Ensures long words are broken
-                                maxWidth: "50%", // Prevents message from overflowing
-                            }}>
-                                {msg.text}
-                            </span>
-                        </div>
-                    ))}
-              {/* Show "thinking..." when the bot is processing */}
-          {loading && (
-            <div className="flex justify-start">
-              <span className="px-4 py-2 text-white rounded-lg bg-gray-500">
-                Thinking...
-              </span>
-            </div>
-          )}       
-            </div>
-            
-            {/*chat bot footer div*/}
-            <div className="border-t-2 flex items-center py-4 px-2 relative ">
-               <div className="flex flex-wrap w-full max-w-full ">
-                 <textarea
-                  placeholder="Type here..."
-                  className="flex-1 rounded-lg px-4 py-2 border-2 mr-2 resize-none"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  rows={1}
+            <button 
+              onClick={toggleChat} 
+              className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label="Close chat"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Chat Body */}
+          <div 
+            ref={chatContainerRef} 
+            className="flex-grow flex flex-col w-full px-4 py-3 space-y-4 overflow-y-auto"
+          >
+            {messages.map((msg, index) => (
+              <div key={index} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
+                <span 
+                  className={`px-4 py-2 text-white rounded-lg break-words ${msg.sender === "user" ? "bg-black" : "bg-red-600"}`}
                   style={{
-                  width: "100%", // full width
-                  minHeight: "36px", // initial minimum height
-                  maxHeight: "100px", // maximum height before scrolling
+                    wordBreak: "break-word",
+                    maxWidth: "75%",
+                  }}
+                >
+                  {msg.text}
+                </span>
+              </div>
+            ))}
+            
+            {/* Loading indicator */}
+            {loading && (
+              <div className="flex justify-start">
+                <span className="px-4 py-2 text-white rounded-lg bg-gray-500">
+                  Thinking...
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Chat Footer */}
+          <div className="border-t-2 flex items-center p-3 bg-white">
+            <div className="flex flex-wrap w-full relative">
+              <textarea
+                placeholder="Type here..."
+                className="w-full rounded-lg px-4 py-2 border-2 pr-10 resize-none"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                rows={1}
+                style={{
+                  minHeight: "36px",
+                  maxHeight: "100px",
                   overflowY: "auto",
-              }}
-            /> 
-            </div>
-                 <button
-                      type="submit"
-                      onClick={handleSend}
-                      className="absolute right-8 top-1/2 transform -translate-y-1/2"
-                >                   
+                }}
+              />
+              <button
+                type="button"
+                onClick={handleSend}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                disabled={loading || input.trim() === ""}
+              >
                 <img src="./send.svg" alt="Send" className="w-5 h-5" />
-                </button>
+              </button>
+
             </div>
-       </div>
+          </div>
+        </div>
+      </div>
     </div>
-    )
+  );
 }

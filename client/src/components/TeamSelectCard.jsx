@@ -2,24 +2,41 @@ import React from 'react';
 import { api } from '../api/api';
 import Swal from 'sweetalert2';
 
-function TeamSelectCard({ player, teamId }) {
+function TeamSelectCard({ player, teamId, teamPlayers, setActiveTab }) {
   const calculateValue = (player) => {
-    let battingSR = (player.totalRuns / player.ballsFaced) * 100;
-    let bowlingSR = (player.oversBowled * 6) / player.wickets;
-    let battingAVG = player.totalRuns / player.inningsPlayed;
-    let economyRate = player.runsConceded / player.oversBowled;
+    const battingSR = player.ballsFaced > 0 ? (player.totalRuns / player.ballsFaced) * 100 : 0;
+    const bowlingSR = player.wickets > 0 ? (player.oversBowled * 6) / player.wickets : 0;
+    const battingAVG = player.inningsPlayed > 0 ? player.totalRuns / player.inningsPlayed : 0;
+    const economyRate = player.oversBowled > 0 ? player.runsConceded / player.oversBowled : 0;
 
-    let points =
-      battingSR / 5 +
-      battingAVG * 0.8 +
-      500 / bowlingSR +
-      140 / economyRate;
+    
+    const point1 = battingSR / 5 + battingAVG * 0.8;
+    const point2 = bowlingSR > 0 ? 500 / bowlingSR : 0;
+    const point3 = economyRate > 0 ? 140 / economyRate : 0;
+    const points = point1 + point2 + point3;
     let value = (9 * points + 100) * 1000;
     return value.toFixed(2);
   };
 
+  const calculateExpenses = () => {
+    let totalExpenses = 0;
+    teamPlayers.forEach((player) => {
+      totalExpenses += parseFloat(calculateValue(player)); 
+    });
+    return totalExpenses.toFixed(2);
+  };
+
 
   const handleBuyPlayer = () => {
+    if (parseFloat(calculateExpenses()) + parseFloat(calculateValue(player)) > 9000000) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed',
+        text: 'You have exceeded the budget of Rs:9,000,000.00'
+      });
+      return;
+    }
+  
     api
       .post("/teams/addAPlayer", { player, teamId })
       .then((response) => {
@@ -28,15 +45,22 @@ function TeamSelectCard({ player, teamId }) {
           icon: 'success',
           title: 'Player Added',
           text: 'Player added to your team',
+        }).then(() => {
+           
+          window.location.reload(); 
+          
+          
         });
       })
       .catch((error) =>
-       Swal.fire({
-        icon: 'error',
-        title: 'Failed',
-        text: error.response.data.message,
-      }));
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed',
+          text: error.response?.data?.message || "An error occurred",
+        })
+      );
   };
+  
 
   return (
     <div className="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm transition-transform hover:scale-105">

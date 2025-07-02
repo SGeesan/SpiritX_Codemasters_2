@@ -66,6 +66,15 @@ router.post("/removeAPlayer", async (req, res) => {
     return res.status(500).json({ message: error.message });
   } 
 });
+
+router.get("/getAllTeams", async (req, res) => {
+    try {
+        const teams = await Team.find();
+        res.json({teams});
+      } catch (error) {
+        res.status(500).json({ message: error.message });
+      }
+});
        
 
 
